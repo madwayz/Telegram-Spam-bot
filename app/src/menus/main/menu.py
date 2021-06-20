@@ -1,4 +1,4 @@
-from menus.main.keyboard import get_main_keyboard
+from src.menus.main.keyboard import get_main_keyboard
 
 
 class MainMenu:
