@@ -12,18 +12,22 @@ class Database:
         self.connect.close()
         self.cursor.close()
 
-    def _execute(self, query):
-        self.cursor.execute(query)
-        return [dict(x) for x in self.cursor.fetchall()]
+    def _execute(self, query, row):
+        if not hasattr(row, '__iter__'):
+            row = (row, )
+        self.cursor.execute(query, row)
+        response = [dict(x) for x in self.cursor.fetchall()]
+        self.connect.commit()
+        return response
 
-    def get_accounts_quantity(self):
-        query = 'SELECT count(*) as count from account'
-        return self._execute(query)[0].get('count')
+    def get_account_quantity(self, account_type: int):
+        query = f'SELECT count(*) as count from account WHERE is_current=True AND type=?'
+        return self._execute(query, account_type)[0].get('count')
 
-    def get_current_taxi_account(self):
-        query = 'SELECT * FROM account WHERE is_current=True AND type=0'
-        return self._execute(query)[0]
+    def get_current_account(self, account_type):
+        query = f'SELECT * FROM account WHERE is_current=True AND type=?'
+        return self._execute(query, account_type)[0]
 
-    def get_current_invest_account(self):
-        query = 'SELECT * FROM account WHERE is_current=True AND type=1'
-        return self._execute(query)[0]
+    def update_account_text(self, account_type, text):
+        query = f'UPDATE account SET distribution_text=? WHERE type=? AND is_current=True RETURNING id'
+        return self._execute(query, [text, account_type])
