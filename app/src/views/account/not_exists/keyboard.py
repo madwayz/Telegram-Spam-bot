@@ -6,6 +6,6 @@ def get_create_account_keyboard():
 
     kb.add(
         InlineKeyboardButton('Добавить💿', callback_data='add_taxi_account'),
-        InlineKeyboardButton('Назад🔙', callback_data='back_to_main_menu'),
+        InlineKeyboardButton('Назад🔙', callback_data='main_menu'),
     )
     return kb

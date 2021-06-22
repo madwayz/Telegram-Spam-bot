@@ -1,4 +1,4 @@
-from src.menus.account.not_exists.keyboard import get_create_account_keyboard
+from src.views.account.not_exists.keyboard import get_create_account_keyboard
 
 
 class NotAvailableAccountsMenu:

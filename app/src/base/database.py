@@ -13,12 +13,12 @@ class Database:
         self.cursor.close()
 
     def _execute(self, query, row):
-        if not hasattr(row, '__iter__'):
+        if isinstance(row, str) or isinstance(row, int):
             row = (row, )
         self.cursor.execute(query, row)
-        response = [dict(x) for x in self.cursor.fetchall()]
+        response_dict = [dict(x) for x in self.cursor.fetchall()]
         self.connect.commit()
-        return response
+        return response_dict
 
     def get_account_quantity(self, account_type: int):
         query = f'SELECT count(*) as count from account WHERE is_current=True AND type=?'
@@ -29,5 +29,32 @@ class Database:
         return self._execute(query, account_type)[0]
 
     def update_account_text(self, account_type, text):
-        query = f'UPDATE account SET distribution_text=? WHERE type=? AND is_current=True RETURNING id'
+        query = f'UPDATE account SET distribution_text=? WHERE type=? AND is_current=True'
         return self._execute(query, [text, account_type])
+
+    def get_chats(self, account_type):
+        query = """
+            SELECT c.username FROM account_chats ac
+            LEFT JOIN account a ON ac.account_id = a.id
+            LEFT JOIN chat_list cl ON ac.chat_list_id = cl.list_id
+            LEFT JOIN chat c ON cl.chat_id = c.id
+            WHERE a.is_current=True AND a.type=?;
+        """
+        return self._execute(query, account_type)
+
+    def add_chat_id(self, account_type, chat_id):
+        query = """
+            INSERT INTO chat (username) VALUES (?);
+        """
+        self._execute(query, chat_id)
+        query = """
+            WITH get_account_chat_list_id AS (
+                SELECT ac.chat_list_id as chat_list_id FROM account_chats ac
+                LEFT JOIN account a on ac.account_id = a.id
+                WHERE a.is_current=True and a.type=?
+                )
+            INSERT INTO chat_list (list_id, chat_id)
+            VALUES ((SELECT * from get_account_chat_list_id), LAST_INSERT_ROWID());
+        """
+        return self._execute(query, account_type)
+

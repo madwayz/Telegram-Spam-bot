@@ -1,13 +1,16 @@
-from src.menus.account.switcher.keyboard import get_switch_account_keyboard
+from src.views.account.switcher.keyboard import get_switch_account_keyboard
 
 
 class SwitchAccountMenu:
-    def __init__(self, initiator):
+    def __init__(self, state):
         self.text = None
+        self.state = state
 
-        if initiator == 'menu_my_accounts':
+        action = self.state.get('action')
+
+        if action == 'menu_my_accounts':
             self.__set_my_accounts_text()
-        elif initiator == 'menu_distribution':
+        elif action == 'menu_distribution':
             self.__set_distribution_text()
 
     def __set_my_accounts_text(self):
@@ -19,6 +22,5 @@ class SwitchAccountMenu:
     def get_text(self):
         return self.text
 
-    @staticmethod
-    def get_keyboard():
+    def get_keyboard(self):
         return get_switch_account_keyboard()
