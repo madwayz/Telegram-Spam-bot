@@ -1,16 +1,16 @@
-from src.models.chat import Chat
+from src.models.account import Account
 from src.utils.excel_builder import XLSXBuilder
 
 
 class ChatsFile:
     def __init__(self, account_type=None):
         self.account_type = account_type
-        self.chat = None
+        self.account = None
 
     def get_file(self):
-        self.chat = Chat(self.account_type)
+        self.account = Account(self.account_type)
 
-        chats_list = self.chat.get_chats()
+        chats_list = self.account.get_chats()
 
         document = XLSXBuilder()
         return document.create_file(chats_list)
@@ -19,5 +19,3 @@ class ChatsFile:
     def parse_file(path):
         document = XLSXBuilder(path)
         return document.parse_file()
-
-

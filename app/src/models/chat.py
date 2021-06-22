@@ -2,17 +2,22 @@ from src.base.database import Database
 
 
 class Chat:
-    def __init__(self, account_type):
+    def __init__(self, account_type=None):
         self.account_type = account_type
         self.db = Database()
 
-    def get_chats(self):
-        response = self.db.get_chats(account_type=self.account_type)
-        return list(map(lambda x: "@" + x.get('username'), response))
+    def get_settings(self, chat_name):
+        settings = self.db.get_settings(chat_name=chat_name)
+        for key in settings.copy():
+            if settings[key] is None:
+                settings.pop(key)
+        return settings
 
-    def add_chat_list(self, data):
-        for chat_id in data:
-            self.db.add_chat_id(account_type=self.account_type, chat_id=chat_id)
+    def add_settings(self, chat_name, interval, message_quantity):
+        self.db.add_settings(chat_name=chat_name, interval=interval, message_quantity=message_quantity)
 
-    def add_chat_id(self, chat_id):
-        self.db.add_chat_id(account_type=self.account_type, chat_id=chat_id)
+    def update_message_interval(self, chat_name, interval):
+        self.db.update_message_interval(chat_name=chat_name, interval=interval)
+
+    def update_message_quantity(self, chat_name, quantity):
+        self.db.update_message_quantity(chat_name=chat_name, quantity=quantity)

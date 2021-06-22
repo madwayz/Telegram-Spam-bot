@@ -1,7 +1,7 @@
 from aiogram.types import InputFile
 
 from src.models.file import ChatsFile
-from src.views.account.chat_list.keyboard import get_chat_list_keyboard
+from src.views.account.chat_list.keyboards import get_chat_list_keyboard
 
 
 class ChatListMenu:

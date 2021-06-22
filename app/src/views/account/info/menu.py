@@ -1,5 +1,5 @@
 from src.models.account import Account
-from src.views.account.info.keyboard import get_account_keyboard
+from src.views.account.info.keyboard import get_account_info_keyboard, get_create_account_keyboard
 
 
 class AccountInfoMenu:
@@ -15,4 +15,14 @@ class AccountInfoMenu:
 
     @staticmethod
     def get_keyboard():
-        return get_account_keyboard()
+        return get_account_info_keyboard()
+
+
+class NotAvailableAccountsMenu:
+    @staticmethod
+    def get_text():
+        return 'Нет доступных аккаунтов.'
+
+    @staticmethod
+    def get_keyboard():
+        return get_create_account_keyboard()

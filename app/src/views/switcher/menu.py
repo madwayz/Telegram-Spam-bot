@@ -1,4 +1,4 @@
-from src.views.account.switcher.keyboard import get_switch_account_keyboard
+from src.views.switcher.keyboards import get_switch_account_keyboard
 
 
 class SwitchAccountMenu:
@@ -23,4 +23,4 @@ class SwitchAccountMenu:
         return self.text
 
     def get_keyboard(self):
-        return get_switch_account_keyboard()
+        return get_switch_account_keyboard(self.state)

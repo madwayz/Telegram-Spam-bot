@@ -1,14 +1,30 @@
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
 
-class ChatSettings(StatesGroup):
+class AccountSettings(StatesGroup):
     waiting_for_text = State()
 
 
-class ChatList(StatesGroup):
-    waiting_for_chats = State()
+class InputChatName(StatesGroup):
+    waiting_for_chat = State()
 
 
 class AddAccount(StatesGroup):
     waiting_for_phone_number = State()
     waiting_for_security_code = State()
+
+
+class ChatSettingsAddInterval(StatesGroup):
+    waiting_for_interval = State()
+
+
+class ChatSettingsEditInterval(StatesGroup):
+    waiting_for_interval = State()
+
+
+class ChatSettingsAddQuantity(StatesGroup):
+    waiting_for_quantity = State()
+
+
+class ChatSettingsEditQuantity(StatesGroup):
+    waiting_for_quantity = State()

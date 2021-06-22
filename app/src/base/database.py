@@ -32,9 +32,9 @@ class Database:
         query = f'UPDATE account SET distribution_text=? WHERE type=? AND is_current=True'
         return self._execute(query, [text, account_type])
 
-    def get_chats(self, account_type):
+    def get_chats_list(self, account_type):
         query = """
-            SELECT c.username FROM account_chats ac
+            SELECT c.name FROM account_chats ac
             LEFT JOIN account a ON ac.account_id = a.id
             LEFT JOIN chat_list cl ON ac.chat_list_id = cl.list_id
             LEFT JOIN chat c ON cl.chat_id = c.id
@@ -44,7 +44,7 @@ class Database:
 
     def add_chat_id(self, account_type, chat_id):
         query = """
-            INSERT INTO chat (username) VALUES (?);
+            INSERT INTO chat (name) VALUES (?);
         """
         self._execute(query, chat_id)
         query = """
@@ -57,4 +57,27 @@ class Database:
             VALUES ((SELECT * from get_account_chat_list_id), LAST_INSERT_ROWID());
         """
         return self._execute(query, account_type)
+
+    def get_settings(self, chat_name):
+        query = "SELECT * FROM chat WHERE chat.name=?"
+        return self._execute(query, chat_name)[0]
+
+    def add_settings(self, chat_name, interval, message_quantity):
+        query = "UPDATE chat SET message_interval=?, message_quantity=? WHERE chat.name=?"
+        self._execute(query, [interval, message_quantity, chat_name])
+
+    def update_message_interval(self, chat_name, interval):
+        query = "UPDATE chat SET message_interval=? WHERE chat.name=?"
+        self._execute(query, [interval, chat_name])
+
+    def update_message_quantity(self, chat_name, quantity):
+        query = "UPDATE chat SET message_quantity=? WHERE chat.name=?"
+        self._execute(query, [quantity, chat_name])
+
+    def add_user(self, username, account_type, security_code):
+        query = "INSERT INTO account (username, account_type, security_code) " \
+                "VALUES (?, ?, ?)"
+        self._execute(query, [username, account_type, security_code])
+
+
 

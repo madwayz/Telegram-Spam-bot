@@ -2,7 +2,7 @@ from aiogram.dispatcher import FSMContext
 
 from src.base.objects import dispatcher, bot
 from aiogram import types
-from src.views.account.switcher.menu import SwitchAccountMenu
+from src.views.switcher.menu import SwitchAccountMenu
 
 
 @dispatcher.callback_query_handler(lambda call: call.data in ['menu_my_accounts', 'menu_distribution'])

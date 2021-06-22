@@ -1,8 +1,8 @@
 from src.models.account import Account
-from src.views.account.chat_settings.keyboard import get_text_setting_keyboard, get_edit_text_keyboard
+from src.views.account.settings.keyboards import get_text_setting_keyboard, get_edit_text_keyboard
 
 
-class ChatSettingsMenu:
+class AccountTextSettingsMenu:
     def __init__(self, state):
         self.state = state
         self.account = Account(state.get('type'))

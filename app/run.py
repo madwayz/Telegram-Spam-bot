@@ -10,4 +10,4 @@ async def shutdown(dp: Dispatcher):
 
 
 if __name__ == '__main__':
-    executor.start_polling(dispatcher, on_shutdown= shutdown(dispatcher))
+    executor.start_polling(dispatcher, on_shutdown=shutdown, skip_updates=True)
