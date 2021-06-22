@@ -26,8 +26,8 @@ class Account:
     def get(self):
         return self._account
 
-    def add(self, username, account_type, security_code):
-        self.db.add_user(username=username, account_type=account_type, security_code=security_code)
+    def create(self, phone_number, account_type, security_code):
+        self.db.add_user(phone_number=phone_number, account_type=account_type, security_code=security_code)
 
     def count_all(self):
         return self.db.get_account_quantity(self.account_type)

@@ -28,3 +28,10 @@ class ChatSettingsAddQuantity(StatesGroup):
 
 class ChatSettingsEditQuantity(StatesGroup):
     waiting_for_quantity = State()
+
+
+class AccountRegister(StatesGroup):
+    confirm_box = State()
+    register_phone_number = State()
+    register_security_code = State()
+    finish = State()

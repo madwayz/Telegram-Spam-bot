@@ -74,10 +74,10 @@ class Database:
         query = "UPDATE chat SET message_quantity=? WHERE chat.name=?"
         self._execute(query, [quantity, chat_name])
 
-    def add_user(self, username, account_type, security_code):
-        query = "INSERT INTO account (username, account_type, security_code) " \
+    def add_user(self, phone_number, account_type, security_code):
+        query = "INSERT INTO account (phone_number, type, security_code) " \
                 "VALUES (?, ?, ?)"
-        self._execute(query, [username, account_type, security_code])
+        self._execute(query, [phone_number, account_type, security_code])
 
 
 
