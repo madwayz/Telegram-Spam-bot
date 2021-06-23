@@ -61,8 +61,11 @@ class UserBot:
     def get_session_path(self):
         return self.session_path + '.session'
 
+    def reconnect(self, session):
+        pass
+
     async def start_distribution(self, chats: list, text: str, interval: int, quantity: int):
         for chat in chats:
             for _ in range(quantity):
                 await self.client.send_message(chat, message=text)
-            await asyncio.sleep(interval)
+            await asyncio.sleep(interval*60)
