@@ -31,7 +31,7 @@ create unique index account_chat_list_id_uindex
 create table api_credentials
 (
     api_id     integer not null,
-    api_hash   integer not null,
+    api_hash   text not null,
     account_id integer not null
         constraint api_credentials_account_id_fk
             references account
