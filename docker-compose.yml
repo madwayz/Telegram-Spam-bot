@@ -1,0 +1,39 @@
+version: "2.4"
+services:
+    bot:
+        container_name: spam_bot
+        build: ./app
+        restart: always
+        depends_on:
+            - postgres
+            - redis
+        env_file:
+            - .env
+
+    postgres:
+        container_name: postgres
+        image: postgres:13.1
+        restart: always
+        ports:
+            - 5432:5432
+        volumes:
+            - ./fixtures/init.sql:/docker-entrypoint-initdb.d/10-init.sql
+        env_file:
+            - .env
+
+    redis:
+        container_name: redis
+        image: redis:6.2.4
+        entrypoint: redis-server --appendonly yes
+        restart: always
+        ports:
+            - 6379:6379
+        volumes:
+            - redis_data:/data
+
+volumes:
+  postgres_data:
+  redis_data:
+
+
+

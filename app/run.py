@@ -1,7 +1,7 @@
 from aiogram import Dispatcher
 from aiogram.utils import executor
-from src.base.objects import dispatcher
-import src.views
+from bot.base.objects import dispatcher
+import bot.views
 
 
 async def shutdown(dp: Dispatcher):
