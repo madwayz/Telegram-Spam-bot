@@ -7,9 +7,7 @@ def get_account_info_keyboard():
     kb.add(
         InlineKeyboardButton('Настройка текста📝', callback_data='text_settings'),
         InlineKeyboardButton('База чатов👥', callback_data='chat_list'),
-        # InlineKeyboardButton('Добавить аккаунт💿', callback_data='create_account'),
-        InlineKeyboardButton('Изменить аккаунт🔄', callback_data='create_account'),
-        # InlineKeyboardButton('Изменить аккаунт🔄', callback_data='update_account'),
+        InlineKeyboardButton('Изменить аккаунт🔄', callback_data='account_list'),
         InlineKeyboardButton('Назад🔙', callback_data='menu_my_accounts'),
     )
     return kb

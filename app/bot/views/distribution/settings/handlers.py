@@ -26,13 +26,13 @@ async def delivery_settings(callback_query: types.CallbackQuery, state: FSMConte
         menu = NotAvailableAccountsMenu()
     else:
         menu = DeliverySettingsMenu(account_state)
+        await InputChatName.waiting_for_chat.set()
 
     await bot.send_message(
         chat_id=callback_query.from_user.id,
         text=menu.get_text(),
         reply_markup=menu.get_keyboard()
     )
-    await InputChatName.waiting_for_chat.set()
 
 
 @dispatcher.callback_query_handler(

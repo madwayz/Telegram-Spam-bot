@@ -7,11 +7,12 @@ class AccountInfoMenu:
         self.account = Account(state.get('type'))
 
     def get_text(self):
-        text = "Данные {type}-аккаунта:\n" \
-               "Номер: {phone_number}\n" \
-               "Username: @{username}\n" \
-               "Имя: {full_name}"
-        return text.format(**self.account.get())
+        account_data = self.account.get()
+        text = f"Данные {account_data.get('type')}-аккаунта:\n" \
+               f"Номер: {account_data.get('phone_number')}\n" \
+               f"Username: {account_data.get('username')}\n" \
+               f"Имя: {account_data.get('full_name')}"
+        return text
 
     @staticmethod
     def get_keyboard():

@@ -92,12 +92,21 @@ async def process_finish_register(message: types.Message, state: FSMContext):
         api_hash=api_hash,
         session_path=userbot.get_session_path()
     )
+
     user_info = await userbot.get_me()
-    # user_info_dict = user_info.stringify()
-    # TODO: Поправить форматирование текста
+
+    full_name = f'{user_info.first_name} {user_info.last_name}'
+    account.update_info(full_name=full_name, username=user_info.username)
+
     await message.answer(f'Готово! {account_state.get("alias")}-аккаунт успешно зарегистрирован👍')
     await message.answer(f'Информация об аккаунте:\n'
                          f'Номер телефона: {phone_number}\n'
-                         f'Имя пользователя: {"undefined"}\n'
-                         f'ФИО: {"undefined"}\n'
-                         f'Тип: {account_state.get("alias")}\n')
+                         f'Имя пользователя: {user_info.username or "не установлено"}\n'
+                         f'ФИО: {full_name}\n'
+                         f'Тип аккаунта: {account_state.get("alias")}\n')
+
+    async with state.proxy() as data:
+        data.pop('phone_number')
+        data.pop('api_id')
+        data.pop('api_hash')
+        data.pop('session_path')

@@ -2,7 +2,7 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 import json
 
 
-def get_accounts_list_keyboard(account):
+def get_accounts_list_keyboard(state, account):
     kb = InlineKeyboardMarkup(row_width=1)
 
     accounts_list = account.list()
@@ -12,4 +12,10 @@ def get_accounts_list_keyboard(account):
         kb.add(
             InlineKeyboardButton(account.get('phone_number'), callback_data=callback_data),
         )
+
+    kb.add(
+        InlineKeyboardButton('Добавить аккаунт💿', callback_data='create_account'),
+        InlineKeyboardButton('Назад🔙', callback_data='taxi_account' if state.get('alias') == 'HR' else 'invest_account')
+    )
+
     return kb

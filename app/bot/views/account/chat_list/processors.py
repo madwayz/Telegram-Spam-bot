@@ -11,7 +11,10 @@ from bot.models.account import Account
 from bot.models.file import ChatsFile
 
 
-@dispatcher.message_handler(content_types=types.ContentTypes.DOCUMENT, state=InputChatName.waiting_for_chat)
+@dispatcher.message_handler(
+    content_types=types.ContentTypes.DOCUMENT,
+    state=InputChatName.waiting_for_chat
+)
 async def process_add_chats_file(message: types.Message, state: FSMContext):
     account_state = await state.get_data()
     document = ChatsFile()

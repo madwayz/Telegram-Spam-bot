@@ -162,3 +162,18 @@ class Database:
             AND c.message_interval IS NOT NULL AND c.message_quantity IS NOT NULL
         """
         return self._execute(query, account_type)
+
+    def update_account_info(self, account_type, **kwargs):
+        query_substring_list = []
+        rows = []
+
+        for k, v in kwargs.items():
+            query_substring_list.append(f'{k}=%s')
+            rows.append(v)
+        rows.append(account_type)
+        query_substring = ', '.join(query_substring_list)
+
+        query = f""" 
+                UPDATE account a SET {query_substring} WHERE a.type=%s AND a.is_current=True
+        """
+        return self._execute(query, rows)

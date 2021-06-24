@@ -62,3 +62,6 @@ class Account:
 
     def set_current(self, account_id):
         self.db.set_current_account(account_type=self.account_type, account_id=account_id)
+
+    def update_info(self, **kwargs):
+        self.db.update_account_info(account_type=self.account_type, **kwargs)

@@ -7,7 +7,8 @@ from bot.utils.get_json_data import get_callback_data
 
 
 @dispatcher.callback_query_handler(
-    lambda call: get_callback_data(call.data, 'action') in ['start_distribution', 'start_mass_distribution']
+    lambda call: call.data in ['start_distribution', 'start_mass_distribution'],
+    state='*'
 )
 async def start_mass_distribution(callback_query: types.CallbackQuery, state: FSMContext):
     action = get_callback_data(callback_query.data, 'action')
@@ -25,7 +26,15 @@ async def start_mass_distribution(callback_query: types.CallbackQuery, state: FS
 
     chats_list = account.get_ready_chats_settings(chat_name if not is_mass_distribution else None)
 
-    await callback_query.answer('Конфигурирую воркер...')
+    if not account.get_chats():
+        await callback_query.answer('Необходимо добавить хотя бы один чат. Операция отменена', show_alert=False)
+        return
+
+    if not chats_list:
+        await callback_query.answer('Необходимо настроить хотя бы один чат. Операция отменена', show_alert=False)
+        return
+
+    await callback_query.answer('Конфигурирую воркер...', show_alert=False)
 
     api_id = account_data.get('api_id')
     api_hash = account_data.get('api_hash')
