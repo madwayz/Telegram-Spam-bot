@@ -13,7 +13,7 @@ class Account:
 
     def get_chats(self):
         response = self.db.get_chats_list(account_type=self.account_type)
-        return list(map(lambda x: x.get('name'), response))
+        return list(map(lambda x: x.get('chat_name'), response))
 
     def add_chat_list(self, data):
         for chat_name in data:

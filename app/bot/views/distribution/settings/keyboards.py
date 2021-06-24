@@ -22,13 +22,13 @@ def get_delivery_settings_keyboard(state):
 def get_chat_settings_keyboard(settings):
     kb = InlineKeyboardMarkup(row_width=1)
 
-    chat_name = settings.get('name')
+    chat_name = settings.get('chat_name')
 
-    add_interval_data = json.dumps({'action': 'set_message_interval', 'data': chat_name})
-    add_message_quantity = json.dumps({'action': 'set_message_quantity', 'data': chat_name})
+    add_interval_data = json.dumps({'action': 'set_interval', 'data': chat_name})
+    add_message_quantity = json.dumps({'action': 'set_quantity', 'data': chat_name})
 
-    edit_interval_data = json.dumps({'action': 'edit_message_interval', 'data': chat_name})
-    edit_message_quantity = json.dumps({'action': 'edit_message_quantity', 'data': chat_name})
+    edit_interval_data = json.dumps({'action': 'edit_interval', 'data': chat_name})
+    edit_message_quantity = json.dumps({'action': 'edit_quantity', 'data': chat_name})
 
     start_distribution = json.dumps({'action': 'start_distribution', 'data': chat_name})
 

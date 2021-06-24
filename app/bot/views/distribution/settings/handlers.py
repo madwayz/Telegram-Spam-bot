@@ -63,7 +63,7 @@ async def revert_to_chat_settings(callback_query: types.CallbackQuery, state: FS
 
 
 @dispatcher.callback_query_handler(
-    lambda call: get_callback_data(call.data, 'action') in ['set_message_interval', 'edit_message_interval']
+    lambda call: get_callback_data(call.data, 'action') in ['set_interval', 'edit_interval']
 )
 async def process_message_interval(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
@@ -73,14 +73,14 @@ async def process_message_interval(callback_query: types.CallbackQuery, state: F
     await bot.send_message(callback_query.from_user.id, 'Введите интервал отправки сообщений(в минутах)⏰')
 
     action = get_callback_data(callback_query.data, 'action')
-    if action == 'set_message_interval':
+    if action == 'set_interval':
         await ChatSettingsAddInterval.waiting_for_interval.set()
-    elif action == 'edit_message_interval':
+    elif action == 'edit_interval':
         await ChatSettingsEditInterval.waiting_for_interval.set()
 
 
 @dispatcher.callback_query_handler(
-    lambda call: get_callback_data(call.data, 'action') in ['set_message_quantity', 'edit_message_quantity']
+    lambda call: get_callback_data(call.data, 'action') in ['set_quantity', 'edit_quantity']
 )
 async def process_message_quantity(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
@@ -89,7 +89,7 @@ async def process_message_quantity(callback_query: types.CallbackQuery, state: F
     await bot.send_message(callback_query.from_user.id, 'Введите количество сообщений')
 
     action = get_callback_data(callback_query.data, 'action')
-    if action == 'set_message_quantity':
+    if action == 'set_quantity':
         await ChatSettingsAddQuantity.waiting_for_quantity.set()
-    elif action == 'edit_message_quantity':
+    elif action == 'edit_quantity':
         await ChatSettingsEditQuantity.waiting_for_quantity.set()

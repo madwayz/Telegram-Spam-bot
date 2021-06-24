@@ -58,7 +58,7 @@ class Database:
 
     def get_chats_list(self, account_type):
         query = """
-            SELECT c.name FROM chat c
+            SELECT c.name as chat_name FROM chat c
             LEFT JOIN chat_list cl on c.id = cl.chat_id
             LEFT JOIN account a on cl.id = a.chat_list_id
             WHERE a.type=%s and is_current=True
@@ -89,11 +89,11 @@ class Database:
         self._execute(query, [interval, message_quantity, chat_name])
 
     def update_message_interval(self, chat_name, interval):
-        query = "UPDATE chat SET message_interval=%s WHERE chat.name=%s"
+        query = "UPDATE chat c SET message_interval=%s WHERE c.name=%s"
         self._execute(query, [interval, chat_name])
 
     def update_message_quantity(self, chat_name, quantity):
-        query = "UPDATE chat SET message_quantity=%s WHERE chat.name=%s"
+        query = "UPDATE chat c SET message_quantity=%s WHERE c.name=%s"
         self._execute(query, [quantity, chat_name])
 
     def add_user(self, phone_number, account_type, session_path, api_id, api_hash):
