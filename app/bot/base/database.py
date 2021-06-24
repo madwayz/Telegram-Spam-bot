@@ -45,7 +45,11 @@ class Database:
         return self._execute(query, account_type)[0].get('count')
 
     def get_current_account(self, account_type):
-        query = f'SELECT * FROM account a WHERE a.is_current=True AND a.type=%s'
+        query = """
+            SELECT a.*, ac.api_hash, api_id FROM account a 
+            LEFT JOIN api_credentials ac on a.id = ac.account_id
+            WHERE a.is_current=True AND a.type=%s
+        """
         return self._execute(query, account_type)[0]
 
     def update_account_text(self, account_type, text):
@@ -75,7 +79,9 @@ class Database:
         return self._execute(query, [chat_name, account_type])
 
     def get_settings(self, chat_name):
-        query = "SELECT * FROM chat WHERE chat.name=%s"
+        query = """
+            SELECT c.name as chat_name, c.message_quantity, c.message_interval 
+            FROM chat c WHERE c.name=%s"""
         return self._execute(query, chat_name)[0]
 
     def add_settings(self, chat_name, interval, message_quantity):
@@ -122,8 +128,10 @@ class Database:
 
     def get_accounts_list(self, account_type):
         query = """
-            SELECT id, phone_number, username, full_name, type, is_current, distribution_text, session_path
-            FROM account WHERE type=%s
+            SELECT a.*, ac.api_id, ac.api_hash
+            FROM account a
+            LEFT JOIN api_credentials ac on ac.account_id = a.id
+            WHERE a.type=%s AND a.is_current=False
         """
         return self._execute(query, account_type)
 
@@ -133,3 +141,24 @@ class Database:
 
         query = """UPDATE account a SET is_current=True WHERE a.id=%s"""
         self._execute(query, account_id)
+
+    def get_chat_ready_settings(self, account_type, chat_name):
+        query = """
+            SELECT c.name as chat_name, c.message_quantity, c.message_interval FROM chat c
+            LEFT JOIN chat_list cl ON c.id = cl.chat_id
+            LEFT JOIN account a ON cl.id = a.chat_list_id
+            WHERE a.type=%s AND is_current=True
+            AND c.message_interval IS NOT NULL AND c.message_quantity IS NOT NULL
+            AND c.name=%s
+        """
+        return self._execute(query, [account_type, chat_name])[0]
+
+    def get_chats_list_ready_settings(self, account_type):
+        query = """
+            SELECT c.name as chat_name, c.message_quantity, c.message_interval FROM chat c
+            LEFT JOIN chat_list cl ON c.id = cl.chat_id
+            LEFT JOIN account a ON cl.id = a.chat_list_id
+            WHERE a.type=%s AND is_current=True
+            AND c.message_interval IS NOT NULL AND c.message_quantity IS NOT NULL
+        """
+        return self._execute(query, account_type)

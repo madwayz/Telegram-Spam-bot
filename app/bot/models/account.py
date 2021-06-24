@@ -22,6 +22,13 @@ class Account:
 
             self.db.add_chat_name(account_type=self.account_type, chat_name=chat_name)
 
+    def get_ready_chats_settings(self, chat_name):
+        """ Возвращает список/конкретный чат подготовленных(-ый) к рассылке чатов пользователя """
+        if chat_name:
+            return self.db.get_chat_ready_settings(account_type=self.account_type, chat_name=chat_name)
+        else:
+            return self.db.get_chats_list_ready_settings(account_type=self.account_type)
+
     def hash_chat_in_list(self, chat_name):
         return bool(self.db.is_chat_in_list(account_type=self.account_type, chat_name=chat_name))
 

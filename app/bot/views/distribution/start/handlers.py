@@ -3,7 +3,6 @@ from aiogram.dispatcher import FSMContext
 
 from bot.base.objects import dispatcher, userbot
 from bot.models.account import Account
-from bot.models.chat import Chat
 from bot.utils.get_json_data import get_callback_data
 
 
@@ -11,29 +10,35 @@ from bot.utils.get_json_data import get_callback_data
     lambda call: get_callback_data(call.data, 'action') in ['start_distribution', 'start_mass_distribution']
 )
 async def start_mass_distribution(callback_query: types.CallbackQuery, state: FSMContext):
-    chat_name = get_callback_data(callback_query.data, 'data')
     action = get_callback_data(callback_query.data, 'action')
-
     is_mass_distribution = action == 'start_mass_distribution'
 
+    chat_name = None
+    if not is_mass_distribution:
+        chat_name = get_callback_data(callback_query.data, 'data')
+
     account_state = await state.get_data()
-    account = Account(account_state.get('type'))
+    account_type = account_state.get('type')
+    account = Account(account_type)
     account_data = account.get()
     text = account_data.get('distribution_text')
 
-    chat = Chat()
-    settings = chat.get_settings(chat_name)
-    message_interval = settings.get('message_interval')
-    message_quantity = settings.get('message_quantity')
+    chats_list = account.get_ready_chats_settings(chat_name if not is_mass_distribution else None)
 
-    if is_mass_distribution:
-        chats_list = account.get_chats()
-    else:
-        chats_list = [chat_name]
+    await callback_query.answer('Конфигурирую воркер...')
 
-    await userbot.start_distribution(
-        chats_list,
-        text,
-        interval=message_interval,
-        quantity=message_quantity,
+    api_id = account_data.get('api_id')
+    api_hash = account_data.get('api_hash')
+    phone_number = account_data.get('phone_number')
+    session_path = account_data.get('session_path')
+
+    userbot.preconfigure(api_id, api_hash, phone_number, session_path)
+
+    await callback_query.answer('Запускаю рассылку...')
+    status = await userbot.start_distribution(
+        chats_list=chats_list,
+        text=text
     )
+
+    message = 'Рассылка успешно закончена' if status else "При рассылке возникли непредвиденные ошибки"
+    await callback_query.answer(message)

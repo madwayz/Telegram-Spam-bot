@@ -29,14 +29,16 @@ class UserBot:
     def add_phone_number(self, phone_number):
         self.phone_number = phone_number
 
-    async def send_code_request(self, session_name=None):
-        self.session_path = os.path.join(SESSION_DIR, session_name or os.urandom(7).hex())
-
+    def _create_client(self):
         self.client = TelegramClient(
             self.session_path,
             self.api_id,
             self.api_hash,
         )
+
+    async def send_code_request(self, session_name=None):
+        self.session_path = os.path.join(SESSION_DIR, session_name or os.urandom(7).hex())
+        self._create_client()
 
         await self.client.connect()
         if await self.client.is_user_authorized():
@@ -67,11 +69,23 @@ class UserBot:
     def get_session_path(self):
         return self.session_path + '.session'
 
-    def reconnect(self, session):
-        pass
+    def preconfigure(self, api_id, api_hash, phone_number, session_path):
+        self.api_id = api_id
+        self.api_hash = api_hash
+        self.phone_number = phone_number
+        self.session_path = session_path
 
-    async def start_distribution(self, chats: list, text: str, interval: int, quantity: int):
-        for chat in chats:
-            for _ in range(quantity):
-                await self.client.send_message(chat, message=text)
-            await asyncio.sleep(interval*60)
+        self._create_client()
+
+    async def start_distribution(self, chats_list: list, text: str):
+        try:
+            for chat in chats_list:
+                quantity = chat.get('message_quantity')
+                interval = chat.get('message_interval')
+                chat_name = chat.get('chat_name')
+                for _ in range(quantity):
+                    await self.client.send_message(chat_name, message=text)
+                await asyncio.sleep(interval*60)
+            return True
+        except:
+            return False

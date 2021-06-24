@@ -23,4 +23,4 @@ class Chat:
         self.db.update_message_quantity(chat_name=chat_name, quantity=quantity)
 
     def has_in_list(self, chat_name):
-        return bool(self.db.is_chat_in_list(account_type=self.account_type, chat_name=chat_name)[0].get('count'))
+        return bool(self.db.is_chat_in_list(account_type=self.account_type, chat_name=chat_name))

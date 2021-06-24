@@ -22,7 +22,7 @@ class ChatSettings:
         self.settings = settings
 
     def get_text(self):
-        return f"Чат: @{self.settings.get('name')}\n" \
+        return f"Чат: @{self.settings.get('chat_name')}\n" \
                f"Количество сообщений: {self.settings.get('message_quantity', 'не установлено')}\n" \
                f"Интервал(мин): {self.settings.get('message_interval', 'не установлен')}"
 
