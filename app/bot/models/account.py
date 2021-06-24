@@ -23,7 +23,7 @@ class Account:
             self.db.add_chat_name(account_type=self.account_type, chat_name=chat_name)
 
     def hash_chat_in_list(self, chat_name):
-        return bool(self.db.is_chat_in_list(account_type=self.account_type, chat_name=chat_name)[0].get('count'))
+        return bool(self.db.is_chat_in_list(account_type=self.account_type, chat_name=chat_name))
 
     def add_chat_name(self, chat_name):
         if self.hash_chat_in_list(chat_name):
@@ -34,6 +34,9 @@ class Account:
     def get(self):
         self._fetch()
         return self._account
+
+    def list(self):
+        return self.db.get_accounts_list(self.account_type)
 
     def create(self, phone_number, account_type, api_id, api_hash, session_path):
         self.db.add_user(
@@ -48,4 +51,7 @@ class Account:
         return self.db.get_account_quantity(self.account_type)
 
     def is_exists(self, phone_number):
-        return bool(self.db.check_exits(phone_number=phone_number)[0].get('count'))
+        return bool(self.db.check_exits(phone_number=phone_number))
+
+    def set_current(self, account_id):
+        self.db.set_current_account(account_type=self.account_type, account_id=account_id)

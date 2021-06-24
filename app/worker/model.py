@@ -1,6 +1,8 @@
 import os
 import typing
 import asyncio
+
+import telethon
 from telethon import TelegramClient
 
 from worker.config import SESSION_DIR
@@ -38,10 +40,14 @@ class UserBot:
 
         await self.client.connect()
         if await self.client.is_user_authorized():
-            return False
+            return {"ok": 'UserAlreadyAuthorized'}
 
-        await self.client.send_code_request(self.phone_number)
-        return True
+        try:
+            await self.client.send_code_request(self.phone_number)
+        except telethon.errors.rpcerrorlist.FloodWaitError as e:
+            return {"error": 'FloodWaitError', 'seconds': e.seconds}
+
+        return {"ok": "SendCodeSuccessfully"}
 
     async def reset(self):
         if await self.client.is_user_authorized():
@@ -52,8 +58,8 @@ class UserBot:
         self.api_hash = None
         self.phone_number = None
 
-    def sign_in(self, code):
-        self.client.sign_in(phone=self.phone_number, code=code)
+    async def sign_in(self, code):
+        await self.client.sign_in(phone=self.phone_number, code=code)
 
     async def get_me(self):
         return await self.client.get_me()

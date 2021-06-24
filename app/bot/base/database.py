@@ -96,7 +96,8 @@ class Database:
 
         query = """
             WITH add_user AS (
-                INSERT INTO account (phone_number, type, session_path, is_current) VALUES (%s, %s, %s, true) RETURNING id
+                INSERT INTO account (phone_number, type, session_path, is_current) 
+                VALUES (%s, %s, %s, true) RETURNING id
             )
             INSERT INTO api_credentials (account_id, api_id, api_hash)
             VALUES ((SELECT id from add_user), %s, %s)
@@ -105,7 +106,7 @@ class Database:
 
     def check_exits(self, phone_number):
         query = "SELECT count(*) AS count FROM account a WHERE a.phone_number=%s"
-        return self._execute(query, phone_number)
+        return self._execute(query, phone_number)[0].get('count')
 
     def is_chat_in_list(self, account_type, chat_name):
         query = """
@@ -116,9 +117,19 @@ class Database:
             SELECT count(c.name) FROM chat c
             LEFT JOIN get_chats gc on gc.chat_id = c.id
             WHERE c.name=%s
-
         """
-        return self._execute(query, [account_type, chat_name])
+        return self._execute(query, [account_type, chat_name])[0].get('count')
 
+    def get_accounts_list(self, account_type):
+        query = """
+            SELECT id, phone_number, username, full_name, type, is_current, distribution_text, session_path
+            FROM account WHERE type=%s
+        """
+        return self._execute(query, account_type)
 
+    def set_current_account(self, account_type, account_id):
+        query = """UPDATE account a SET is_current=False WHERE a.type=%s"""
+        self._execute(query, account_type)
 
+        query = """UPDATE account a SET is_current=True WHERE a.id=%s"""
+        self._execute(query, account_id)

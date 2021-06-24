@@ -51,7 +51,14 @@ async def process_api_hash(message: types.Message, state: FSMContext):
 
     userbot.add_api_hash(api_hash)
     await state.update_data({'api_hash': api_hash})
-    await userbot.send_code_request()
+
+    status = await userbot.send_code_request()
+    if status.get('error'):
+        await message.answer('Введите код подтверждения, который отправил вам телеграм✉️')
+        await state.set_state(AccountRegister.register_phone_number)
+        await message.answer(f'Аккаунт заблокирован на {status.get("seconds")} секунд. Введите другой номер телефона.')
+        return
+
     await message.answer('Введите код подтверждения, который отправил вам телеграм✉️')
     await AccountRegister.register_security_code.set()
 
@@ -64,7 +71,7 @@ async def process_security_number(message: types.Message, state: FSMContext):
         await state.set_state(AccountRegister.register_security_code)
         return
 
-    userbot.sign_in(code)
+    await userbot.sign_in(code)
     await state.update_data({'security_code': code})
     await process_finish_register(message, state)
 
@@ -85,7 +92,8 @@ async def process_finish_register(message: types.Message, state: FSMContext):
         api_hash=api_hash,
         session_path=userbot.get_session_path()
     )
-    # user_info = await userbot.get_me().stringify()
+    user_info = await userbot.get_me()
+    # user_info_dict = user_info.stringify()
     # TODO: Поправить форматирование текста
     await message.answer(f'Готово! {account_state.get("alias")}-аккаунт успешно зарегистрирован👍')
     await message.answer(f'Информация об аккаунте:\n'
