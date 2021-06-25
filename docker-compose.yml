@@ -14,8 +14,6 @@ services:
         container_name: postgres
         image: postgres:13.1
         restart: always
-        ports:
-            - 5432:5432
         volumes:
             - ./fixtures:/docker-entrypoint-initdb.d/
         env_file:
@@ -26,8 +24,6 @@ services:
         image: redis:6.2.4
         entrypoint: redis-server --appendonly yes
         restart: always
-        ports:
-            - 6379:6379
         volumes:
             - redis_data:/data
 
