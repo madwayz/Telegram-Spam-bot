@@ -12,37 +12,40 @@ from bot.base.states import ChatSettingsEditQuantity, ChatSettingsEditInterval, 
 from bot.base.states import ChatSettingsAddQuantity, ChatSettingsAddInterval
 
 
-@dispatcher.callback_query_handler(
-    lambda call: call.data in ['taxi_delivery_settings', 'invest_delivery_settings'],
-    state='*'
-)
-async def delivery_settings(callback_query: types.CallbackQuery, state: FSMContext):
-    await bot.answer_callback_query(callback_query.id)
-    await update_base_state(state, callback_query)
-    account_state = await state.get_data()
-
-    account = Account(account_state.get('type'))
+async def show_delivery_settings_menu(account_type, chat_id):
+    account = Account(account_type)
     if not account.count_all():
         menu = NotAvailableAccountsMenu()
     else:
-        menu = DeliverySettingsMenu(account_state)
+        menu = DeliverySettingsMenu(account)
         await InputChatName.waiting_for_chat.set()
 
     await bot.send_message(
-        chat_id=callback_query.from_user.id,
+        chat_id=chat_id,
         text=menu.get_text(),
         reply_markup=menu.get_keyboard()
     )
 
 
 @dispatcher.callback_query_handler(
+    lambda call: call.data in ['taxi_delivery_settings', 'invest_delivery_settings'],
+    state='*'
+)
+async def delivery_settings(callback_query: types.CallbackQuery, state: FSMContext):
+    await bot.answer_callback_query(callback_query.id)
+    await update_base_state(state, callback_query.data)
+    account_state = await state.get_data()
+
+    account_type = account_state.get('type')
+    await show_delivery_settings_menu(account_type, callback_query.from_user.id)
+
+
+@dispatcher.callback_query_handler(
     lambda call: get_callback_data(call.data, 'action') == 'chat_settings',
     state='*'
 )
-async def chat_settings(callback_query: types.CallbackQuery, state: FSMContext):
+async def chat_settings(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
-    await state.reset_state(with_data=False)
-
     chat_name = get_callback_data(callback_query.data, 'data')
 
     chat = Chat()
@@ -59,17 +62,20 @@ async def chat_settings(callback_query: types.CallbackQuery, state: FSMContext):
 
 @dispatcher.callback_query_handler(lambda call: call.data == 'revert_to_chat_settings', state='*')
 async def revert_to_chat_settings(callback_query: types.CallbackQuery, state: FSMContext):
-    await delivery_settings(callback_query, state)
+    account_state = await state.get_data()
+    account_type = account_state.get('type')
+    await show_delivery_settings_menu(account_type, callback_query.from_user.id)
 
 
 @dispatcher.callback_query_handler(
-    lambda call: get_callback_data(call.data, 'action') in ['set_interval', 'edit_interval']
+    lambda call: get_callback_data(call.data, 'action') in ['set_interval', 'edit_interval'],
+    state='*'
 )
-async def process_message_interval(callback_query: types.CallbackQuery, state: FSMContext):
+async def message_interval(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
 
     chat_name = get_callback_data(callback_query.data, 'data')
-    await state.set_data({'chat_name': chat_name})
+    await state.update_data({'chat_name': chat_name})
     await bot.send_message(callback_query.from_user.id, 'Введите интервал отправки сообщений(в минутах)⏰')
 
     action = get_callback_data(callback_query.data, 'action')
@@ -80,12 +86,13 @@ async def process_message_interval(callback_query: types.CallbackQuery, state: F
 
 
 @dispatcher.callback_query_handler(
-    lambda call: get_callback_data(call.data, 'action') in ['set_quantity', 'edit_quantity']
+    lambda call: get_callback_data(call.data, 'action') in ['set_quantity', 'edit_quantity'],
+    state='*'
 )
-async def process_message_quantity(callback_query: types.CallbackQuery, state: FSMContext):
+async def message_quantity(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
     chat_name = get_callback_data(callback_query.data, 'data')
-    await state.set_data({'chat_name': chat_name})
+    await state.update_data({'chat_name': chat_name})
     await bot.send_message(callback_query.from_user.id, 'Введите количество сообщений')
 
     action = get_callback_data(callback_query.data, 'action')

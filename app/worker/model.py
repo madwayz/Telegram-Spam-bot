@@ -4,6 +4,7 @@ import asyncio
 
 import telethon
 from telethon import TelegramClient
+from telethon.tl.functions.channels import JoinChannelRequest
 
 from worker.config import SESSION_DIR
 
@@ -15,6 +16,7 @@ class UserBot:
         self.api_hash: typing.Union[str, None] = None
         self.phone_number: typing.Union[str, None] = None
         self.session_path: typing.Union[str, None] = None
+        self.account_data = None
 
     def __del__(self):
         if isinstance(self.client, TelegramClient):
@@ -40,16 +42,16 @@ class UserBot:
         self.session_path = os.path.join(SESSION_DIR, session_name or os.urandom(7).hex())
         self._create_client()
 
-        await self.client.connect()
-        if await self.client.is_user_authorized():
-            return {"ok": 'UserAlreadyAuthorized'}
+        with self.client as client:
+            if await client.is_user_authorized():
+                return {"ok": 'UserAlreadyAuthorized'}
 
-        try:
-            await self.client.send_code_request(self.phone_number)
-        except telethon.errors.rpcerrorlist.FloodWaitError as e:
-            return {"error": 'FloodWaitError', 'seconds': e.seconds}
+            try:
+                await client.send_code_request(self.phone_number)
+            except telethon.errors.rpcerrorlist.FloodWaitError as e:
+                return {"error": 'FloodWaitError', 'seconds': e.seconds}
 
-        return {"ok": "SendCodeSuccessfully"}
+            return {"ok": "SendCodeSuccessfully"}
 
     async def reset(self):
         if await self.client.is_user_authorized():
@@ -69,23 +71,37 @@ class UserBot:
     def get_session_path(self):
         return self.session_path + '.session'
 
-    def preconfigure(self, api_id, api_hash, phone_number, session_path):
+    async def preconfigure(self, api_id, api_hash, phone_number, session_path):
         self.api_id = api_id
         self.api_hash = api_hash
         self.phone_number = phone_number
         self.session_path = session_path
 
         self._create_client()
+        await self.client.connect()
+        self.account_data = await self.client.get_me()
+
+    async def send_message(self, chat_name, interval, quantity, text):
+        for _ in range(quantity):
+            await self.client(JoinChannelRequest(channel=chat_name))
+            await self.client.send_message(chat_name, message=text)
+            await asyncio.sleep(interval * 60)
+
+    async def create_tasks(self, chats_list, text):
+        tasks = []
+        for chat in chats_list:
+            quantity = chat.get('message_quantity')
+            interval = chat.get('message_interval')
+            chat_name = chat.get('chat_name')
+            task = self.client.loop.create_task(self.send_message(chat_name, interval, quantity, text), name='test')
+            tasks.append(task)
+        return tasks
 
     async def start_distribution(self, chats_list: list, text: str):
         try:
-            for chat in chats_list:
-                quantity = chat.get('message_quantity')
-                interval = chat.get('message_interval')
-                chat_name = chat.get('chat_name')
-                for _ in range(quantity):
-                    await self.client.send_message(chat_name, message=text)
-                await asyncio.sleep(interval*60)
+            await self.create_tasks(chats_list, text)
             return True
-        except:
+        except Exception:
+            import traceback
+            traceback.print_exc()
             return False

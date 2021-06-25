@@ -12,7 +12,6 @@ async def send_welcome_page(message: types.Message, state: FSMContext):
         text=menu.get_text(),
         reply_markup=menu.get_keyboard()
     )
-    await state.finish()
 
 
 @dispatcher.callback_query_handler(lambda call: call.data == 'main_menu', state='*')

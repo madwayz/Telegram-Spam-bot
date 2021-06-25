@@ -12,7 +12,7 @@ from bot.views.account.info.menu import AccountInfoMenu, NotAvailableAccountsMen
 async def account_menu(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
     await state.reset_state(with_data=False)
-    await update_base_state(state, callback_query)
+    await update_base_state(state, callback_query.data)
 
     account_state = await state.get_data()
     account_type = account_state.get('type')

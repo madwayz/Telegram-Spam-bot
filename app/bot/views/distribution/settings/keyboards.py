@@ -4,16 +4,15 @@ from bot.models.account import Account
 import json
 
 
-def get_delivery_settings_keyboard(state):
+def get_delivery_settings_keyboard(account):
     kb = InlineKeyboardMarkup(row_width=1)
-    account_type = state.get('type')
-    account = Account(account_type)
 
     for chat in account.get_chats():
         kb.add(InlineKeyboardButton('@' + chat, callback_data=json.dumps({'action': 'chat_settings', 'data': chat})))
 
+    start_mass_distribution = json.dumps({'action': 'start_mass_distribution'})
     kb.add(
-        InlineKeyboardButton('Начать рассылку💬', callback_data='start_mass_distribution'),
+        InlineKeyboardButton('Начать массовую рассылку💬', callback_data=start_mass_distribution),
         InlineKeyboardButton('Назад🔙', callback_data='menu_distribution')
     )
     return kb

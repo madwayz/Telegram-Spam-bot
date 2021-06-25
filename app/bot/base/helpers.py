@@ -1,8 +1,8 @@
 from bot.utils.account_type import get_account_type_id
 
 
-async def update_base_state(state, callback_query):
-    account_type_data = get_account_type_id(callback_query.data)
+async def update_base_state(state, account_type_name):
+    account_type_data = get_account_type_id(account_type_name)
     if not account_type_data:
         return
 

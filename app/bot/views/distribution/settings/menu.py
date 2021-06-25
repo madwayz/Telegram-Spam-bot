@@ -4,9 +4,8 @@ from bot.views.distribution.settings.keyboards import get_chat_settings_keyboard
 
 
 class DeliverySettingsMenu:
-    def __init__(self, state):
-        self.state = state
-        self.account = Account(state.get('type'))
+    def __init__(self, account):
+        self.account = account
 
     @staticmethod
     def get_text():
@@ -14,7 +13,7 @@ class DeliverySettingsMenu:
                "выберите чат из списка или введите его @username ниже"
 
     def get_keyboard(self):
-        return get_delivery_settings_keyboard(self.state)
+        return get_delivery_settings_keyboard(self.account)
 
 
 class ChatSettings:

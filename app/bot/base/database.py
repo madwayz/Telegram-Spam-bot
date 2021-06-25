@@ -151,7 +151,7 @@ class Database:
             AND c.message_interval IS NOT NULL AND c.message_quantity IS NOT NULL
             AND c.name=%s
         """
-        return self._execute(query, [account_type, chat_name])[0]
+        return self._execute(query, [account_type, chat_name])
 
     def get_chats_list_ready_settings(self, account_type):
         query = """
