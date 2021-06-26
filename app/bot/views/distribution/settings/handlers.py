@@ -28,7 +28,10 @@ async def show_delivery_settings_menu(account_type, chat_id):
 
 
 @dispatcher.callback_query_handler(
-    lambda call: call.data in ['taxi_delivery_settings', 'invest_delivery_settings'],
+    lambda call: call.data in ['taxi_delivery_settings',
+                               'invest_delivery_settings',
+                               'pawnshop_delivery_settings',
+                               'wagons_delivery_settings'],
     state='*'
 )
 async def delivery_settings(callback_query: types.CallbackQuery, state: FSMContext):
