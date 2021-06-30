@@ -42,7 +42,7 @@ class UserBot:
         self.session_path = os.path.join(SESSION_DIR, session_name or os.urandom(7).hex())
         self._create_client()
 
-        with self.client as client:
+        async with self.client as client:
             if await client.is_user_authorized():
                 return {"ok": 'UserAlreadyAuthorized'}
 
