@@ -65,10 +65,13 @@ class UserBot:
         self.phone_number = None
 
     async def sign_in(self, code):
+        await self.client.connect()
         await self.client.sign_in(phone=self.phone_number, code=code)
 
     async def get_me(self):
-        return await self.client.get_me()
+        me = await self.client.get_me()
+        self.client.disconnect()
+        return me
 
     def get_session_path(self):
         return self.session_path + '.session'
