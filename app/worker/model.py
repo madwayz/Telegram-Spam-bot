@@ -42,16 +42,18 @@ class UserBot:
         self.session_path = os.path.join(SESSION_DIR, session_name or os.urandom(7).hex())
         self._create_client()
 
-        async with self.client as client:
-            if await client.is_user_authorized():
-                return {"ok": 'UserAlreadyAuthorized'}
+        await self.client.connect()
+        if await self.client.is_user_authorized():
+            return {"ok": 'UserAlreadyAuthorized'}
 
-            try:
-                await client.send_code_request(self.phone_number)
-            except telethon.errors.rpcerrorlist.FloodWaitError as e:
-                return {"error": 'FloodWaitError', 'seconds': e.seconds}
+        try:
+            await self.client.send_code_request(self.phone_number)
+        except telethon.errors.rpcerrorlist.FloodWaitError as e:
+            return {"error": 'FloodWaitError', 'seconds': e.seconds}
+        finally:
+            await self.client.disconnect()
 
-            return {"ok": "SendCodeSuccessfully"}
+        return {"ok": "SendCodeSuccessfully"}
 
     async def reset(self):
         if await self.client.is_user_authorized():
