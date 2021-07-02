@@ -94,6 +94,7 @@ async def process_finish_register(message: types.Message, state: FSMContext):
     )
 
     user_info = await userbot.get_me()
+    await userbot.client.disconnect()
 
     full_name = f'{user_info.first_name} {user_info.last_name}'
     account.update_info(full_name=full_name, username=user_info.username)
