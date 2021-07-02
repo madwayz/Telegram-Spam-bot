@@ -65,8 +65,7 @@ class UserBot:
         self.phone_number = None
 
     async def sign_in(self, code):
-        if not self.client.is_connected():
-            await self.client.connect()
+        await self.client.connect()
         await self.client.sign_in(phone=self.phone_number, code=code)
 
     async def get_me(self):
