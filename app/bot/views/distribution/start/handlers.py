@@ -78,5 +78,3 @@ async def start_mass_distribution(callback_query: types.CallbackQuery, state: FS
         chat_id=callback_query.from_user.id,
         text=message
     )
-
-    # await userbot.client.disconnect()
