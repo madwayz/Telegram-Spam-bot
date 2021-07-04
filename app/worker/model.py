@@ -7,6 +7,7 @@ from telethon import TelegramClient
 from telethon.tl.functions.channels import JoinChannelRequest
 
 from worker.config import SESSION_DIR
+import traceback
 
 
 class UserBot:
@@ -31,18 +32,18 @@ class UserBot:
     def add_phone_number(self, phone_number):
         self.phone_number = phone_number
 
-    def _create_client(self):
+    async def _create_client(self):
         self.client = TelegramClient(
             self.session_path,
             self.api_id,
             self.api_hash,
         )
-
-    async def send_code_request(self, session_name=None):
-        self.session_path = os.path.join(SESSION_DIR, session_name or os.urandom(7).hex())
-        self._create_client()
-
         await self.client.connect()
+
+    async def send_code_request(self):
+        self.session_path = os.path.join(SESSION_DIR, os.urandom(7).hex())
+        await self._create_client()
+
         if await self.client.is_user_authorized():
             return {"ok": 'UserAlreadyAuthorized'}
 
@@ -65,12 +66,11 @@ class UserBot:
         self.phone_number = None
 
     async def sign_in(self, code):
-        await self.client.connect()
         await self.client.sign_in(phone=self.phone_number, code=code)
+        await self.client.disconnect()
 
     async def get_me(self):
-        me = await self.client.get_me()
-        return me
+        return await self.client.get_me()
 
     def get_session_path(self):
         return self.session_path + '.session'
@@ -81,8 +81,7 @@ class UserBot:
         self.phone_number = phone_number
         self.session_path = session_path
 
-        self._create_client()
-        await self.client.connect()
+        await self._create_client()
         self.account_data = await self.client.get_me()
 
     async def send_message(self, chat_name, interval, quantity, text):
@@ -106,6 +105,5 @@ class UserBot:
             await self.create_tasks(chats_list, text)
             return True
         except Exception:
-            import traceback
-            traceback.print_exc()
+            traceback.format_exc()
             return False

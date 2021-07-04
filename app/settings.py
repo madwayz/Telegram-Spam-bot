@@ -7,6 +7,7 @@ DATABASE = {
     "dbname": os.environ.get("POSTGRES_DB"),
     "user": os.environ.get("POSTGRES_USER"),
     "host": os.environ.get("POSTGRES_HOST"),
-    "password": os.environ.get("POSTGRES_PASSWORD")
+    "password": os.environ.get("POSTGRES_PASSWORD"),
+    "port": os.environ.get("POSTGRES_PORT", "5432")
 }
 REDIS_HOST = os.environ.get('REDIS_HOST')

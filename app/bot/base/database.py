@@ -18,7 +18,7 @@ class Database:
         Метод подключения к бд
         :return:
         """
-        config_connect = "dbname='{dbname}' user='{user}' host='{host}' password='{password}'"
+        config_connect = "dbname='{dbname}' user='{user}' host='{host}' password='{password}' port='{port}'"
         connect = psycopg2.connect(config_connect.format(**DATABASE))
         return connect, connect.cursor(cursor_factory=RealDictCursor)
 
