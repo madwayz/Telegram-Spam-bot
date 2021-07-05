@@ -19,10 +19,6 @@ class UserBot:
         self.session_path: typing.Union[str, None] = None
         self.account_data = None
 
-    def __del__(self):
-        if isinstance(self.client, TelegramClient):
-            self.client.disconnect()
-
     def add_api_id(self, api_id):
         self.api_id = api_id
 
@@ -51,9 +47,6 @@ class UserBot:
             await self.client.send_code_request(self.phone_number)
         except telethon.errors.rpcerrorlist.FloodWaitError as e:
             return {"error": 'FloodWaitError', 'seconds': e.seconds}
-        finally:
-            await self.client.disconnect()
-
         return {"ok": "SendCodeSuccessfully"}
 
     async def reset(self):
@@ -67,7 +60,6 @@ class UserBot:
 
     async def sign_in(self, code):
         await self.client.sign_in(phone=self.phone_number, code=code)
-        await self.client.disconnect()
 
     async def get_me(self):
         return await self.client.get_me()

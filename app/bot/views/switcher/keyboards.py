@@ -13,7 +13,7 @@ def get_switch_account_keyboard(state):
         InlineKeyboardButton('Такси📞', callback_data=taxi_button_data),
         InlineKeyboardButton('Инвест📊', callback_data=invest_button_data),
         InlineKeyboardButton('Ломбард', callback_data=pawnshop_button_data),
-        InlineKeyboardButton('Фуры', callback_data=invest_button_data),
-        InlineKeyboardButton('Назад🔙', callback_data=wagons_button_data),
+        InlineKeyboardButton('Фуры', callback_data=wagons_button_data),
+        InlineKeyboardButton('Назад🔙', callback_data='main_menu'),
     )
     return kb
