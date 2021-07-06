@@ -13,6 +13,3 @@ alter table chat
 
 create unique index chat_id_uindex
     on chat (id);
-
-create unique index chat_name_uindex
-    on chat (name);

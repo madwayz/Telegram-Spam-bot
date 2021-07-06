@@ -17,9 +17,6 @@ class Account:
 
     def add_chat_list(self, data):
         for chat_name in data:
-            if self.hash_chat_in_list(chat_name):
-                continue
-
             self.db.add_chat_name(account_type=self.account_type, chat_name=chat_name)
 
     def get_ready_chats_settings(self, chat_name):
@@ -29,13 +26,7 @@ class Account:
         else:
             return self.db.get_chats_list_ready_settings(account_type=self.account_type)
 
-    def hash_chat_in_list(self, chat_name):
-        return bool(self.db.is_chat_in_list(account_type=self.account_type, chat_name=chat_name))
-
     def add_chat_name(self, chat_name):
-        if self.hash_chat_in_list(chat_name):
-            return
-
         self.db.add_chat_name(account_type=self.account_type, chat_name=chat_name)
 
     def get(self):
