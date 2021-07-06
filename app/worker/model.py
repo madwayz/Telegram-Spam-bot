@@ -35,6 +35,7 @@ class UserBot:
             self.api_hash,
         )
         self.client.start(phone=self.phone_number)
+        await self.client.connect()
 
     async def send_code_request(self):
         self.session_path = os.path.join(SESSION_DIR, os.urandom(7).hex())
