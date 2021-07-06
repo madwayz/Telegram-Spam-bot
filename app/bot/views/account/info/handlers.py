@@ -12,7 +12,7 @@ from bot.views.account.info.menu import AccountInfoMenu, NotAvailableAccountsMen
     lambda call: call.data in ['taxi_account',
                                'invest_account',
                                'pawnshop_account',
-                               'wagons_delivery_settings'],
+                               'wagons_account'],
     state='*')
 async def account_menu(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
