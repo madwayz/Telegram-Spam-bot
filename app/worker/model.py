@@ -75,7 +75,6 @@ class UserBot:
         self.session_path = session_path
 
         await self._create_client()
-        await self.client.sign_in(phone=self.phone_number)
         self.account_data = await self.client.get_me()
 
     async def send_message(self, chat_name, interval, quantity, text):
