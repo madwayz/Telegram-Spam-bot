@@ -116,15 +116,12 @@ class Database:
 
     def is_chat_in_list(self, account_type, chat_name):
         query = """
-            WITH get_chats AS (
-                SELECT chat_id FROM chat_list
-                WHERE id=(SELECT chat_list_id FROM account WHERE type=%s AND is_current=True)
-            )
-            SELECT count(c.name) FROM chat c
-            LEFT JOIN get_chats gc on gc.chat_id = c.id
-            WHERE c.name=%s
+            SELECT count(c) FROM chat c
+            LEFT JOIN chat_list cl ON c.id = cl.chat_id
+            LEFT JOIN account a ON cl.id = a.chat_list_id
+            WHERE c.name=%s AND a.is_current=True AND a.type=%s
         """
-        return self._execute(query, [account_type, chat_name])[0].get('count')
+        return self._execute(query, [chat_name, account_type])[0].get('count')
 
     def get_accounts_list(self, account_type):
         query = """
@@ -177,3 +174,16 @@ class Database:
                 UPDATE account a SET {query_substring} WHERE a.type=%s AND a.is_current=True
         """
         return self._execute(query, rows)
+
+    def update_distribution_status(self, account_type, status):
+        query = f'UPDATE account a SET in_progress=%s WHERE a.type=%s AND a.is_current=True'
+        return self._execute(query, [status, account_type])
+
+    # def get_account_chat_quantity(self, account_type, name):
+    #     query = """
+    #         select count(c) as count from chat c
+    #         left join chat_list cl on c.id = cl.chat_id
+    #         left join account a on cl.id = a.chat_list_id
+    #         where c.name=%s and a.is_current=True and a.type=%s
+    #     """
+    #     return self._execute(query, [name, account_type])[0].get('count')

@@ -10,7 +10,8 @@ create table account
     is_current        boolean default false not null,
     distribution_text text    default 'отсутствует'::text,
     session_path      text                  not null,
-    chat_list_id      serial                not null
+    chat_list_id      serial                not null,
+    in_progress       boolean default false
 );
 
 alter table account

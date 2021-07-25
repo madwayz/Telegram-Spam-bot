@@ -34,8 +34,8 @@ class UserBot:
             self.api_id,
             self.api_hash,
         )
-        self.client.start(phone=self.phone_number)
         await self.client.connect()
+        await self.client.start(phone=lambda: self.phone_number)
 
     async def send_code_request(self):
         self.session_path = os.path.join(SESSION_DIR, os.urandom(7).hex())
@@ -89,14 +89,10 @@ class UserBot:
             quantity = chat.get('message_quantity')
             interval = chat.get('message_interval')
             chat_name = chat.get('chat_name')
-            task = self.client.loop.create_task(self.send_message(chat_name, interval, quantity, text), name='test')
+            task = self.client.loop.create_task(self.send_message(chat_name, interval, quantity, text))
             tasks.append(task)
         return tasks
 
     async def start_distribution(self, chats_list: list, text: str):
-        try:
-            await self.create_tasks(chats_list, text)
-            return True
-        except Exception:
-            traceback.format_exc()
-            return False
+        tasks = await self.create_tasks(chats_list, text)
+        await asyncio.wait(tasks)

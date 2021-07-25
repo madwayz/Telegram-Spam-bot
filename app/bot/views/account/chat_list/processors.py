@@ -35,8 +35,9 @@ async def process_add_chats_file(message: types.Message, state: FSMContext):
         return
 
     chat_list = set(map(lambda x: x[1:], chat_tags_list))
+
     account.add_chat_list(chat_list)
-    await message.answer('База чатов успешно обновлена👍')
+    await message.answer('База успешно обновлена уникальными чатами👍')
     await state.reset_state(with_data=False)
 
 
@@ -56,6 +57,12 @@ async def process_add_chat(message: types.Message, state: FSMContext):
 
     chat_tag = chat_tag_search.group()
     chat_name = chat_tag[1:]
+
+    if account.is_has_chat(chat_name):
+        await message.answer('Такой чат уже есть в базе. Добавьте другой.')
+        await state.set_state(InputChatName.waiting_for_chat)
+        return
+
     account.add_chat_name(chat_name)
     await message.answer('База чатов успешно обновлена👍')
     await state.reset_state(with_data=False)

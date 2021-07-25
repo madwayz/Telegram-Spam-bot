@@ -1,4 +1,3 @@
-from bot.models.account import Account
 from bot.views.distribution.settings.keyboards import get_delivery_settings_keyboard
 from bot.views.distribution.settings.keyboards import get_chat_settings_keyboard
 

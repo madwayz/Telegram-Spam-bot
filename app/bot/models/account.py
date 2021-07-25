@@ -8,8 +8,9 @@ class Account:
         self.db = Database()
 
     def _fetch(self):
+        account_types = ['HR', 'Инвест', 'Ломбард', 'Фуры']
         self._account = self.db.get_current_account(self.account_type)
-        self._account['type'] = 'Инвест' if self._account['type'] else 'HR'
+        self._account['type'] = account_types[self._account['type']]
 
     def get_chats(self):
         response = self.db.get_chats_list(account_type=self.account_type)
@@ -56,3 +57,9 @@ class Account:
 
     def update_info(self, **kwargs):
         self.db.update_account_info(account_type=self.account_type, **kwargs)
+
+    def update_distribution_status(self, status: bool):
+        self.db.update_distribution_status(account_type=self.account_type, status=status)
+
+    def is_has_chat(self, name):
+        return self.db.is_chat_in_list(account_type=self.account_type, chat_name=name)
