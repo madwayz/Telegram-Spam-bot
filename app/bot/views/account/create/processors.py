@@ -52,12 +52,19 @@ async def process_api_hash(message: types.Message, state: FSMContext):
     userbot.add_api_hash(api_hash)
     await state.update_data({'api_hash': api_hash})
 
-    status = await userbot.send_code_request()
-    if status.get('error'):
+    try:
+        status = await userbot.send_code_request()
+
+        if status.get('error'):
+            await message.answer('Введите код подтверждения, который отправил вам телеграм✉️')
+            await state.set_state(AccountRegister.register_phone_number)
+            await message.answer(f'Аккаунт заблокирован на {status.get("seconds")} секунд. Введите другой номер телефона.')
+            return
+
+    except Exception as e:
+        await message.answer(f'Internal error. {e}')
         await message.answer('Введите код подтверждения, который отправил вам телеграм✉️')
-        await state.set_state(AccountRegister.register_phone_number)
-        await message.answer(f'Аккаунт заблокирован на {status.get("seconds")} секунд. Введите другой номер телефона.')
-        return
+        await AccountRegister.register_security_code.set()
 
     await message.answer('Введите код подтверждения, который отправил вам телеграм✉️')
     await AccountRegister.register_security_code.set()
@@ -95,7 +102,9 @@ async def process_finish_register(message: types.Message, state: FSMContext):
 
     user_info = await userbot.get_me()
 
-    full_name = f'{user_info.first_name} {user_info.last_name}'
+    full_name = f'{user_info.first_name}'
+    if user_info.last_name:
+        full_name = f"{full_name} {user_info.last_name}"
     account.update_info(full_name=full_name, username=user_info.username)
 
     await message.answer(f'Готово! {account_state.get("alias")}-аккаунт успешно зарегистрирован👍')
