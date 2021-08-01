@@ -52,20 +52,7 @@ async def process_api_hash(message: types.Message, state: FSMContext):
     userbot.add_api_hash(api_hash)
     await state.update_data({'api_hash': api_hash})
 
-    try:
-        status = await userbot.send_code_request()
-
-        if status.get('error'):
-            await message.answer('Введите код подтверждения, который отправил вам телеграм✉️')
-            await state.set_state(AccountRegister.register_phone_number)
-            await message.answer(f'Аккаунт заблокирован на {status.get("seconds")} секунд. Введите другой номер телефона.')
-            return
-
-    except Exception as e:
-        await message.answer(f'Internal error. {e}')
-        await message.answer('Введите код подтверждения, который отправил вам телеграм✉️')
-        await AccountRegister.register_security_code.set()
-
+    await userbot.authorize()
     await message.answer('Введите код подтверждения, который отправил вам телеграм✉️')
     await AccountRegister.register_security_code.set()
 
@@ -79,7 +66,6 @@ async def process_security_number(message: types.Message, state: FSMContext):
         return
 
     await userbot.sign_in(code)
-    await state.update_data({'security_code': code})
     await process_finish_register(message, state)
 
 
@@ -97,7 +83,7 @@ async def process_finish_register(message: types.Message, state: FSMContext):
         account_type=account_type,
         api_id=api_id,
         api_hash=api_hash,
-        session_path=userbot.get_session_path()
+        session_name=userbot.session_name
     )
 
     user_info = await userbot.get_me()
@@ -114,8 +100,13 @@ async def process_finish_register(message: types.Message, state: FSMContext):
                          f'ФИО: {full_name}\n'
                          f'Тип аккаунта: {account_state.get("alias")}\n')
 
+    await userbot.client.terminate()
+    await userbot.client.disconnect()
+
     async with state.proxy() as data:
         data.pop('phone_number')
         data.pop('api_id')
         data.pop('api_hash')
-        data.pop('session_path')
+        data.pop('session_name')
+
+    await state.reset_state(False)

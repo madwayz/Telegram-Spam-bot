@@ -2,22 +2,25 @@ import os
 import typing
 import asyncio
 
-import telethon
-from telethon import TelegramClient
-from telethon.tl.functions.channels import JoinChannelRequest
-
 from worker.config import SESSION_DIR
-import traceback
+
+from pyrogram import Client
 
 
 class UserBot:
     def __init__(self):
-        self.client: typing.Union[TelegramClient, None] = None
+        self.client: typing.Union[Client, None] = None
         self.api_id: typing.Union[str, int, None] = None
         self.api_hash: typing.Union[str, None] = None
         self.phone_number: typing.Union[str, None] = None
-        self.session_path: typing.Union[str, None] = None
+        self.session_name: typing.Union[str, None] = None
+        self.phone_code_hash: typing.Union[str, None] = None
         self.account_data = None
+
+    def __del__(self):
+        if self.client:
+            self.client.terminate()
+            self.client.disconnect()
 
     def add_api_id(self, api_id):
         self.api_id = api_id
@@ -28,59 +31,57 @@ class UserBot:
     def add_phone_number(self, phone_number):
         self.phone_number = phone_number
 
-    async def _create_client(self):
-        self.client = TelegramClient(
-            self.session_path,
-            self.api_id,
-            self.api_hash,
-        )
-        await self.client.connect()
-        await self.client.start(phone=lambda: self.phone_number)
+    def _set_params(self, kwargs):
+        return [setattr(self, attr, value) for attr, value in kwargs.items()]
 
-    async def send_code_request(self):
-        self.session_path = os.path.join(SESSION_DIR, os.urandom(7).hex())
-        await self._create_client()
-
-        if await self.client.is_user_authorized():
-            return {"ok": 'UserAlreadyAuthorized'}
-
-        try:
-            await self.client.send_code_request(self.phone_number)
-        except telethon.errors.rpcerrorlist.FloodWaitError as e:
-            return {"error": 'FloodWaitError', 'seconds': e.seconds}
-        return {"ok": "SendCodeSuccessfully"}
-
-    async def reset(self):
-        if await self.client.is_user_authorized():
-            await self.client.disconnect()
-
-        self.client = None
-        self.api_id = None
-        self.api_hash = None
-        self.phone_number = None
+    def generate_session(self):
+        self.session_name = os.urandom(7).hex()
 
     async def sign_in(self, code):
-        await self.client.sign_in(phone=self.phone_number, code=code)
+        await self.client.sign_in(
+            phone_number=self.phone_number,
+            phone_code_hash=self.phone_code_hash,
+            phone_code=code
+        )
 
     async def get_me(self):
         return await self.client.get_me()
 
-    def get_session_path(self):
-        return self.session_path + '.session'
+    async def send_code(self):
+        sent_code = await self.client.send_code(phone_number=self.phone_number)
+        self.phone_code_hash = sent_code.__getattribute__('phone_code_hash')
 
-    async def preconfigure(self, api_id, api_hash, phone_number, session_path):
-        self.api_id = api_id
-        self.api_hash = api_hash
-        self.phone_number = phone_number
-        self.session_path = session_path
+    async def authorize(self, **kwargs):
+        status = None
+        if kwargs and all(kwargs.values()):
+            self._set_params(kwargs)
 
-        await self._create_client()
-        self.account_data = await self.client.get_me()
+        if not kwargs.get('session_name'):
+            self.generate_session()
+
+        await self.create_client()
+
+        if not kwargs.get('session_name'):
+            await self.send_code()
+            status = 'SecurityCodeNeeded'
+
+        return status
+
+    async def create_client(self):
+        self.client = Client(
+            session_name=self.session_name,
+            phone_number=self.phone_number,
+            api_id=self.api_id,
+            api_hash=self.api_hash,
+            workdir=SESSION_DIR
+        )
+        await self.client.connect()
+        await self.client.initialize()
 
     async def send_message(self, chat_name, interval, quantity, text):
         for _ in range(quantity):
-            await self.client(JoinChannelRequest(channel=chat_name))
-            await self.client.send_message(chat_name, message=text)
+            await self.client.join_chat(f'@{chat_name}')
+            await self.client.send_message(f'@{chat_name}', text)
             await asyncio.sleep(interval * 60)
 
     async def create_tasks(self, chats_list, text):
@@ -96,3 +97,5 @@ class UserBot:
     async def start_distribution(self, chats_list: list, text: str):
         tasks = await self.create_tasks(chats_list, text)
         await asyncio.wait(tasks)
+        await self.client.terminate()
+        await self.client.disconnect()

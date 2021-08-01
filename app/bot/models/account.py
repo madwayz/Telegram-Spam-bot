@@ -7,7 +7,7 @@ class Account:
         self.account_type = account_type
         self.db = Database()
 
-    def _fetch(self):
+    def _fetch(self,):
         account_types = ['HR', 'Инвест', 'Ломбард', 'Фуры']
         self._account = self.db.get_current_account(self.account_type)
         self._account['type'] = account_types[self._account['type']]
@@ -37,13 +37,13 @@ class Account:
     def list(self):
         return self.db.get_accounts_list(self.account_type)
 
-    def create(self, phone_number, account_type, api_id, api_hash, session_path):
+    def create(self, phone_number, account_type, api_id, api_hash, session_name):
         self.db.add_user(
             phone_number=phone_number,
             account_type=account_type,
             api_id=api_id,
             api_hash=api_hash,
-            session_path=session_path
+            session_name=session_name
         )
 
     def count_all(self):
@@ -63,3 +63,6 @@ class Account:
 
     def is_has_chat(self, name):
         return self.db.is_chat_in_list(account_type=self.account_type, chat_name=name)
+
+    def get_chat_settings(self, chat_name):
+        return self.db.get_settings(account_type=self.account_type, chat_name=chat_name)

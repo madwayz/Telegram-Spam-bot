@@ -47,14 +47,16 @@ async def delivery_settings(callback_query: types.CallbackQuery, state: FSMConte
     lambda call: get_callback_data(call.data, 'action') == 'chat_settings',
     state='*'
 )
-async def chat_settings(callback_query: types.CallbackQuery):
+async def chat_settings(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
     chat_name = get_callback_data(callback_query.data, 'data')
 
-    chat = Chat()
-    settings = chat.get_settings(chat_name)
+    account_state = await state.get_data()
+    account_type = account_state.get('type')
+    account = Account(account_type)
+    chat_settings = account.get_chat_settings(chat_name)
 
-    menu = ChatSettings(settings)
+    menu = ChatSettings(chat_settings)
 
     await bot.send_message(
         chat_id=callback_query.from_user.id,

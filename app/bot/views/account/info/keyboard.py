@@ -8,6 +8,7 @@ def get_account_info_keyboard():
         InlineKeyboardButton('Настройка текста📝', callback_data='text_settings'),
         InlineKeyboardButton('База чатов👥', callback_data='chat_list'),
         InlineKeyboardButton('Изменить аккаунт🔄', callback_data='account_list'),
+        InlineKeyboardButton('Переавторизовать аккаунт🔁', callback_data='account_reauth'),
         InlineKeyboardButton('Назад🔙', callback_data='menu_my_accounts'),
     )
     return kb

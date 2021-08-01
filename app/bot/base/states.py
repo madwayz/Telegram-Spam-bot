@@ -36,3 +36,7 @@ class AccountRegister(StatesGroup):
     register_api_hash = State()
     register_security_code = State()
     finish = State()
+
+
+class AccountReauth(StatesGroup):
+    register_security_code = State()

@@ -53,7 +53,7 @@ class Database:
         return self._execute(query, account_type)[0]
 
     def update_account_text(self, account_type, text):
-        query = f'UPDATE account a SET distribution_text=%s WHERE a.type=%s AND a.is_current=True'
+        query = f'UPDATE account a SET distribution_text = %s WHERE a.type=%s AND a.is_current=True'
         return self._execute(query, [text, account_type])
 
     def get_chats_list(self, account_type):
@@ -78,37 +78,75 @@ class Database:
         """
         return self._execute(query, [chat_name, account_type])
 
-    def get_settings(self, chat_name):
+    def get_settings(self, account_type, chat_name):
         query = """
-            SELECT c.name as chat_name, c.message_quantity, c.message_interval 
-            FROM chat c WHERE c.name=%s"""
-        return self._execute(query, chat_name)[0]
+            SELECT c.name as chat_name, c.message_quantity, c.message_interval FROM chat c
+            LEFT JOIN chat_list cl ON c.id = cl.chat_id
+            LEFT JOIN account a ON cl.id = a.chat_list_id 
+            WHERE c.name=%s AND a.type=%s AND a.is_current=True"""
+        return self._execute(query, [chat_name, account_type])[0]
 
-    def add_settings(self, chat_name, interval, message_quantity):
-        query = "UPDATE chat SET message_interval=%s, message_quantity=%s WHERE chat.name=%s"
-        self._execute(query, [interval, message_quantity, chat_name])
+    def add_settings(self, account_type, chat_name, message_interval, message_quantity):
+        query = """
+            WITH get_chat_id as (
+                SELECT c.id as chat_id
+                FROM chat c
+                         LEFT JOIN chat_list cl ON c.id = cl.chat_id
+                         LEFT JOIN account a ON cl.id = a.chat_list_id
+                WHERE c.name = %s
+                  AND a.type = %s
+                  AND a.is_current = True
+            )
+            UPDATE chat c
+            SET message_interval = %s,
+                message_quantity = %s
+            WHERE c.id = (select chat_id from get_chat_id)
+            """
+        self._execute(query, [chat_name, account_type, message_interval, message_quantity])
 
-    def update_message_interval(self, chat_name, interval):
-        query = "UPDATE chat c SET message_interval=%s WHERE c.name=%s"
-        self._execute(query, [interval, chat_name])
+    def update_message_interval(self, account_type, chat_name, message_interval):
+        query = """
+            WITH get_chat_id as (
+                SELECT c.id as chat_id
+                FROM chat c
+                         LEFT JOIN chat_list cl ON c.id = cl.chat_id
+                         LEFT JOIN account a ON cl.id = a.chat_list_id
+                WHERE c.name = %s
+                  AND a.type = %s
+                  AND a.is_current = True
+            )
+            UPDATE chat c SET message_interval = %s WHERE c.id = (select chat_id from get_chat_id)
+        """
+        self._execute(query, [chat_name, account_type, message_interval])
 
-    def update_message_quantity(self, chat_name, quantity):
-        query = "UPDATE chat c SET message_quantity=%s WHERE c.name=%s"
-        self._execute(query, [quantity, chat_name])
+    def update_message_quantity(self, account_type, chat_name, message_quantity):
+        query = """
+                    WITH get_chat_id as (
+                        SELECT c.id as chat_id
+                        FROM chat c
+                                 LEFT JOIN chat_list cl ON c.id = cl.chat_id
+                                 LEFT JOIN account a ON cl.id = a.chat_list_id
+                        WHERE c.name = %s
+                          AND a.type = %s
+                          AND a.is_current = True
+                    )
+                    UPDATE chat c SET message_quantity = %s WHERE c.id = (select chat_id from get_chat_id)
+                """
+        self._execute(query, [chat_name, account_type, message_quantity])
 
-    def add_user(self, phone_number, account_type, session_path, api_id, api_hash):
+    def add_user(self, phone_number, account_type, session_name, api_id, api_hash):
         query = "UPDATE account a SET is_current=False WHERE a.type=%s"
         self._execute(query, account_type)
 
         query = """
             WITH add_user AS (
-                INSERT INTO account (phone_number, type, session_path, is_current) 
+                INSERT INTO account (phone_number, type, session_name, is_current) 
                 VALUES (%s, %s, %s, true) RETURNING id
             )
             INSERT INTO api_credentials (account_id, api_id, api_hash)
             VALUES ((SELECT id from add_user), %s, %s)
         """
-        return self._execute(query, [phone_number, account_type, session_path, api_id, api_hash])
+        return self._execute(query, [phone_number, account_type, session_name, api_id, api_hash])
 
     def check_exits(self, phone_number):
         query = "SELECT count(*) AS count FROM account a WHERE a.phone_number=%s"
@@ -176,14 +214,5 @@ class Database:
         return self._execute(query, rows)
 
     def update_distribution_status(self, account_type, status):
-        query = f'UPDATE account a SET in_progress=%s WHERE a.type=%s AND a.is_current=True'
+        query = f'UPDATE account a SET in_progress = %s WHERE a.type=%s AND a.is_current=True'
         return self._execute(query, [status, account_type])
-
-    # def get_account_chat_quantity(self, account_type, name):
-    #     query = """
-    #         select count(c) as count from chat c
-    #         left join chat_list cl on c.id = cl.chat_id
-    #         left join account a on cl.id = a.chat_list_id
-    #         where c.name=%s and a.is_current=True and a.type=%s
-    #     """
-    #     return self._execute(query, [name, account_type])[0].get('count')

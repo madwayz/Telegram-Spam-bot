@@ -9,7 +9,7 @@ create table account
     type              integer,
     is_current        boolean default false not null,
     distribution_text text    default 'отсутствует'::text,
-    session_path      text                  not null,
+    session_name      text                  not null,
     chat_list_id      serial                not null,
     in_progress       boolean default false
 );

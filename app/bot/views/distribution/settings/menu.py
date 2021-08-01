@@ -20,9 +20,11 @@ class ChatSettings:
         self.settings = settings
 
     def get_text(self):
+        message_quantity = self.settings['message_quantity'] or 'не установлено'
+        message_interval = self.settings['message_interval'] or 'не установлено'
         return f"Чат: @{self.settings.get('chat_name')}\n" \
-               f"Количество сообщений: {self.settings.get('message_quantity', 'не установлено')}\n" \
-               f"Интервал(мин): {self.settings.get('message_interval', 'не установлен')}"
+               f"Количество сообщений: {message_quantity}\n" \
+               f"Интервал(мин): {message_interval}"
 
     def get_keyboard(self):
         return get_chat_settings_keyboard(self.settings)
